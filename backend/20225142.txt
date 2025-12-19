@@ -1,0 +1,48 @@
+Giải thích các tính năng bổ sung:
+A.Backend:
+1. Create – Email duy nhất
+
+Trường email có unique: true → MongoDB tạo unique index, đảm bảo không có 2 user dùng chung email.
+
+API kiểm tra thủ công bằng findOne({ email }) trước khi tạo mới → tránh lỗi duplicate key và trả về thông báo rõ ràng cho người dùng.
+→ Kết hợp 2 lớp bảo vệ giúp email luôn duy nhất và xử lý lỗi thân thiện.
+
+2. GET – Dùng Promise.all để truy vấn song song
+
+API dùng Promise.all([User.find(), User.countDocuments()]) để chạy 2 truy vấn cùng lúc.
+
+Tăng tốc độ vì không phải đợi truy vấn thứ nhất xong mới chạy truy vấn thứ hai.
+
+Giúp pagination chạy nhanh và tối ưu hơn.
+
+B.Frontend:
+1. STT tăng dần theo toàn bộ các trang
+STT được tính bằng công thức:
+→ (page - 1) * limit + index + 1
+Giúp số thứ tự không bị reset ở mỗi trang mà liên tục từ đầu đến cuối danh sách.
+
+2. Page tự chuyển về 1 khi thay đổi limit
+Khi đổi số dòng/trang (limit), trang hiện tại có thể không còn hợp lệ,
+nên set page = 1 để tránh lỗi API và đảm bảo dữ liệu luôn đúng.
+
+3. Kiểm tra dữ liệu đầu vào (Validation)
+Form kiểm tra các trường trước khi gửi API:
+
+Tên ≥ 2 ký tự
+
+Tuổi ≥ 0
+
+Email đúng định dạng
+
+Hiển thị lỗi trực tiếp bên dưới input nếu sai
+Giúp đảm bảo dữ liệu người dùng nhập luôn hợp lệ.
+
+4. Thông báo lỗi từ server (ví dụ email trùng)
+Khi API trả lỗi (res.ok === false), UI hiển thị alert:
+
+Email trùng lặp
+
+Dữ liệu chưa hợp lệ
+
+Lỗi kết nối
+Giúp người dùng biết chính xác lý do thao tác thất bại.
